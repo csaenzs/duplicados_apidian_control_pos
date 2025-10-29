@@ -1,0 +1,61 @@
+# ================================================
+# Configuración de Seguridad Apache
+# ================================================
+
+# Denegar acceso a archivos sensibles
+<FilesMatch "\.(env|log|sql|bak|config|ini)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Denegar acceso a archivos que empiezan con punto
+<FilesMatch "^\.">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Denegar acceso directo a archivos PHP excepto los puntos de entrada
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Permitir acceso solo a archivos específicos
+<FilesMatch "^(index\.php|api\.php|procesar_duplicados\.php|test_conexion\.php|test_conexion_mysqli\.php|diagnostico_conexion\.php)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Proteger contra directory listing
+Options -Indexes
+
+# Proteger contra ataques XSS
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Prevenir acceso a archivos de configuración
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Prevenir acceso a logs
+<Files "*.log">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Configuración adicional de seguridad
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acceso a carpetas ocultas
+    RewriteRule ^\.(.*)$ - [F,L]
+
+    # Bloquear acceso a archivos de respaldo
+    RewriteRule \.(bak|backup|old|orig|original|tmp|temp|copy)$ - [F,L]
+</IfModule>

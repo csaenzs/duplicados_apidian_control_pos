@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API DIAN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .response {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .json-null { color: #569cd6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🚀 API DIAN - Prueba de Endpoints</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('simple')">Proceso Simple</button>
+                <button class="tab" onclick="showTab('manual')">Proceso Manual</button>
+                <button class="tab" onclick="showTab('info')">Info API</button>
+            </div>
+
+            <!-- Tab: Proceso Simple -->
+            <div id="simple" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">Proceso Completo (Auth + Download)</h2>
+
+                <div class="form-group">
+                    <label>URL del Token DIAN:</label>
+                    <textarea id="tokenUrl" rows="3" placeholder="https://catalogo-vpfe.dian.gov.co/User/AuthToken?pk=10910094%7C1117488256&rk=1117488256&token=0a8032b1-6704-4519-ae89-463290680b34"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Track ID:</label>
+                    <input type="text" id="trackId" placeholder="ff3a9b3443a5c18c946095dd258ff3b0f86e63db3531623d4691f4fa5114af5051e50b035bd0dd81090922950bdb7767">
+                </div>
+
+                <button onclick="processComplete()">Procesar Factura</button>
+
+                <div class="loading">⏳ Procesando...</div>
+                <div class="status"></div>
+                <div class="response" id="simpleResponse"></div>
+            </div>
+
+            <!-- Tab: Proceso Manual -->
+            <div id="manual" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Proceso Manual (2 pasos)</h2>
+
+                <h3 style="margin: 20px 0 10px;">Paso 1: Autenticación</h3>
+                <div class="form-group">
+                    <label>URL del Token DIAN:</label>
+                    <textarea id="tokenUrlManual" rows="3" placeholder="URL completo del token DIAN"></textarea>
+                </div>
+                <button onclick="authenticate()">Autenticar</button>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Session ID (se llenará automáticamente):</label>
+                    <input type="text" id="sessionId" readonly>
+                </div>
+
+                <h3 style="margin: 20px 0 10px;">Paso 2: Descargar Factura</h3>
+                <div class="form-group">
+                    <label>Track ID:</label>
+                    <input type="text" id="trackIdManual" placeholder="Track ID de la factura">
+                </div>
+                <button onclick="downloadInvoice()">Descargar Factura</button>
+
+                <div class="response" id="manualResponse"></div>
+            </div>
+
+            <!-- Tab: Info -->
+            <div id="info" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Información de la API</h2>
+                <button onclick="getInfo()">Obtener Info API</button>
+                <div class="response" id="infoResponse"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'api.php';
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        async function processComplete() {
+            const tokenUrl = document.getElementById('tokenUrl').value.trim();
+            const trackId = document.getElementById('trackId').value.trim();
+
+            if (!tokenUrl || !trackId) {
+                alert('Por favor complete todos los campos');
+                return;
+            }
+
+            const loading = document.querySelector('.loading');
+            const status = document.querySelector('.status');
+            const response = document.getElementById('simpleResponse');
+
+            loading.classList.add('active');
+            status.className = 'status';
+            response.innerHTML = '';
+
+            try {
+                const res = await fetch(API_URL + '?action=process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token_url: tokenUrl,
+                        track_id: trackId
+                    })
+                });
+
+                const data = await res.json();
+
+                loading.classList.remove('active');
+
+                if (data.success) {
+                    status.className = 'status success';
+                    status.textContent = '✅ Factura procesada exitosamente';
+
+                    // Mostrar solo las facturas
+                    const facturasData = {
+                        facturas: data.facturas,
+                        total: data.facturas.length
+                    };
+
+                    response.innerHTML = syntaxHighlight(JSON.stringify(facturasData, null, 2));
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '❌ Error: ' + (data.error || 'Error desconocido');
+                    response.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                status.className = 'status error';
+                status.textContent = '❌ Error de conexión: ' + error.message;
+            }
+        }
+
+        async function authenticate() {
+            const tokenUrl = document.getElementById('tokenUrlManual').value.trim();
+
+            if (!tokenUrl) {
+                alert('Por favor ingrese el URL del token');
+                return;
+            }
+
+            const response = document.getElementById('manualResponse');
+            response.innerHTML = 'Autenticando...';
+
+            try {
+                const res = await fetch(API_URL + '?action=auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token_url: tokenUrl
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('sessionId').value = data.session_id;
+                    response.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+                } else {
+                    response.innerHTML = '❌ ' + syntaxHighlight(JSON.stringify(data, null, 2));
+                }
+            } catch (error) {
+                response.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+
+        async function downloadInvoice() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            const trackId = document.getElementById('trackIdManual').value.trim();
+
+            if (!sessionId || !trackId) {
+                alert('Por favor complete la autenticación y el track ID');
+                return;
+            }
+
+            const response = document.getElementById('manualResponse');
+            response.innerHTML = 'Descargando...';
+
+            try {
+                const res = await fetch(API_URL + '?action=download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        track_id: trackId
+                    })
+                });
+
+                const data = await res.json();
+                response.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+            } catch (error) {
+                response.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+
+        async function getInfo() {
+            const response = document.getElementById('infoResponse');
+            response.innerHTML = 'Cargando...';
+
+            try {
+                const res = await fetch(API_URL + '?action=info');
+                const data = await res.json();
+                response.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+            } catch (error) {
+                response.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+
+        // Cargar info al iniciar
+        window.onload = () => {
+            // Valores de ejemplo
+            document.getElementById('tokenUrl').value = 'https://catalogo-vpfe.dian.gov.co/User/AuthToken?pk=10910094%7C1117488256&rk=1117488256&token=0a8032b1-6704-4519-ae89-463290680b34';
+        };
+    </script>
+</body>
+</html>

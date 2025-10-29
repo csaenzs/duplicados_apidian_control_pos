@@ -1,0 +1,74 @@
+# ================================================
+# Archivos y carpetas a ignorar en Git
+# ================================================
+
+# Variables de entorno - NUNCA subir a Git
+.env
+.env.local
+.env.*.local
+
+# Archivos de configuración con datos sensibles
+config.local.php
+database.php
+
+# Logs
+*.log
+logs/
+error_log
+access_log
+
+# Archivos de respaldo
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+*.temp
+*.copy
+*~
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de caché
+cache/
+temp/
+tmp/
+
+# Archivos de sesión PHP
+sessions/
+sess_*
+
+# Archivos subidos (si los hay)
+uploads/
+files/
+
+# Archivos de base de datos
+*.sql
+*.sqlite
+*.db
+
+# Dependencias (si usas composer)
+vendor/
+composer.lock
+
+# Documentación generada
+docs/api/
+
+# Archivos de prueba locales
+test_*.php
+*_test.php
+prueba*.php
+
+# Cookies de la aplicación
+cookies/*.txt
