@@ -125,7 +125,13 @@ class ValidadorDuplicados {
      * Llamar API local
      */
     private function llamarAPI($endpoint, $data) {
-        $url = 'http://localhost/factura_dian_descargar/' . $endpoint;
+        // Detectar la URL base dinámicamente
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+        $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+        $baseUrl = $protocol . '://' . $host . $scriptDir;
+
+        $url = rtrim($baseUrl, '/') . '/' . $endpoint;
 
         $options = [
             'http' => [
